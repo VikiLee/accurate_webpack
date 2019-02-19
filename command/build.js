@@ -6,7 +6,6 @@ const webpack = require('webpack')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const shell = require('shelljs')
 const glob = require('glob')
-const path = require('path')
 const utils = require('../config/utils')
 
 // 是否全量打包
@@ -19,37 +18,39 @@ let entry = utils.getEntry()
 let modifiedEntry = null // 已修改的文件入口集合
 let addEntry = {} // 新加的文件入口集合
 
-const result = shell.exec('git status')
-let match = null
+if (!isBuildAll) {
+  const result = shell.exec('git status')
+  let match = null
 
-// 获取修改的文件
-let modifiedFiles = []
-match = result.match(/modified:\s+(.+)/g)
-for (let i = 0, len = match.length; i < len; i++) {
-  if (/src\/(views|components)/.test(match[i])) {
-    let path = match[i].match(/\s+(.+)/)[1]
-    modifiedFiles.push(path)
-  }
-}
-modifiedEntry = utils.getModifiedEntry(modifiedFiles)
-
-// 获取新加的文件
-let addFiles = []
-// 获取出新加的文件列表字符串
-let r = /(?<=\(use "git add <file>\.\.\." to include in what will be committed\))((\n|\t|.)+)/.test(result)
-// 获取新加文件路径
-if (r) {
-  let addFilesListStr = RegExp.$1
-  match = addFilesListStr.match(/\n*\t+(.)+\n+/g)
+  // 获取修改的文件
+  let modifiedFiles = []
+  match = result.match(/modified:\s+(.+)/g)
   for (let i = 0, len = match.length; i < len; i++) {
-    let path = match[i].replace(/(\t|\n)/g, '')
-    let paths = glob.sync(`${path}/**/index.js`)
-    for (let path of paths) {
-      addFiles.push(path)
+    if (/src\/(views|components)/.test(match[i])) {
+      let path = match[i].match(/\s+(.+)/)[1]
+      modifiedFiles.push(path)
     }
   }
+  modifiedEntry = utils.getModifiedEntry(modifiedFiles)
+
+  // 获取新加的文件
+  let addFiles = []
+  // 获取出新加的文件列表字符串
+  let r = /(?<=\(use "git add <file>\.\.\." to include in what will be committed\))((\n|\t|.)+)/.test(result)
+  // 获取新加文件路径
+  if (r) {
+    let addFilesListStr = RegExp.$1
+    match = addFilesListStr.match(/\n*\t+(.)+\n+/g)
+    for (let i = 0, len = match.length; i < len; i++) {
+      let path = match[i].replace(/(\t|\n)/g, '')
+      let paths = glob.sync(`${path}/**/index.js`)
+      for (let path of paths) {
+        addFiles.push(path)
+      }
+    }
+  }
+  addEntry = utils.getAddEntry(addFiles)
 }
-addEntry = utils.getAddEntry(addFiles)
 
 let newEntry = {}
 Object.assign(newEntry, addEntry, modifiedEntry)
