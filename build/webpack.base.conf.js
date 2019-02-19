@@ -1,12 +1,9 @@
-var path = require('path')
 var utils = require(process.cwd() + '/config/utils')
 var config = require(process.cwd() + '/config')
 var vueLoaderConfig = require('./vue-loader.conf')
 
 module.exports = {
-  entry: {
-    app: utils.getEntry()
-  },
+  entry: utils.getEntry(),
   output: {
     path: config.build.assetsRoot,
     filename: '[name].js',
@@ -19,7 +16,6 @@ module.exports = {
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
       '@': process.cwd() + '/modules',
-      '@src': utils.getModulePath(),
       'jquery': 'jquery',
       '$': 'jquery'
     }

@@ -1,8 +1,9 @@
 var path = require('path')
 var glob = require('glob')
-var fs = require('fs')
 var config = require('../config')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
+var HtmlWebpackPlugin = require('html-webpack-plugin')
+var isDev = process.env.NODE_ENV === 'development'
 
 exports.assetsPath = function (_path) {
   var assetsSubDirectory = process.env.NODE_ENV === 'production'
@@ -84,41 +85,41 @@ exports.getEntry = function () {
 }
 
 // 获取单个入口文件对应的key
-exports.getKey = (filePath) => {
-    let startIndex = path.indexOf('views') + 6
-    let endIndex = 0
-    if(path.indexOf('component') > -1){
-        // 如果修改的是组件
-        endIndex = path.indexOf('component')
-    } else {
-        endIndex = path.lastIndexOf('/')
-    }
-    return path.substring(startIndex, endIndex)
+exports.getKey = (path) => {
+  let startIndex = path.indexOf('views') + 6
+  let endIndex = 0
+  if (path.indexOf('component') > -1) {
+    // 如果修改的是组件
+    endIndex = path.indexOf('component')
+  } else {
+    endIndex = path.lastIndexOf('/')
+  }
+  return path.substring(startIndex, endIndex)
 }
 
 // 获取所有入口文件对应的keys
 exports.getKeys = (filesPath) => {
-    let result = []
-    for(let path of filesPath) {
-        let key = export.getKey(path)
-        if(result.indexOf(key) === -1) {
-            result.push(key)
-        }
+  let result = []
+  for (let path of filesPath) {
+    let key = exports.getKey(path)
+    if (result.indexOf(key) === -1) {
+      result.push(key)
     }
-    return result
+  }
+  return result
 }
 
 // 根据入口文件生成HtmlWebpackPlugins
 exports.getHtmlWebpackPlugins = () => {
-  let entyies = exports.getEntry()
+  let entry = exports.getEntry()
   let keys = Object.keys(entry)
   let plugins = keys
     .map((key) => {
       // ejs模板，要和index.js在同个目录下
-      let template = exports.getTemplate(entyies[key])
-      let filename = `${__dirname}/dist/${key}.html`
+      let template = exports.getTemplate(entry[key])
+      console.log(1111, key)
       return new HtmlWebpackPlugin({
-        filename,
+        filename: isDev ? `${key}.html` : `${__dirname}/dist/${key}.html`,
         template: template,
         inject: true,
         minify: {
@@ -128,23 +129,22 @@ exports.getHtmlWebpackPlugins = () => {
         },
         // chunks: globals.concat([key]),
         chunksSortMode: 'dependency',
-        excludeChunks: keys.filter(e => e != key)
+        excludeChunks: keys.filter(e => e !== key)
       })
-  })
+    })
   return plugins
 }
 
-
 // 获取入口文件对应的模板
 exports.getTemplate = (path) => {
-  path = path.subStr(0, path.lastIndexOf('/'))
-  var path = glob.sync(path + '/index.html')
-  if(path.length > 0) {
+  path = path.substring(0, path.lastIndexOf('/'))
+  path = glob.sync(path + '/index.html')
+  if (path.length > 0) {
     return path[0]
   } else {
-    //取上级目录下的模板文件路径
-    if(path.lastIndexOf('/') !== -1) {
-      path = path.substr(0, path.lastIndexOf('/'))
+    // 取上级目录下的模板文件路径
+    if (path.lastIndexOf('/') !== -1) {
+      path = path.substring(0, path.lastIndexOf('/'))
       return exports.getTemplate(path)
     }
   }
@@ -155,9 +155,9 @@ exports.getModifiedEntry = (modifiedFiles) => {
   let modifiedKeys = exports.getKeys(modifiedFiles)
   let modifiedEntry = {}
   // 全量entry
-  let webpackEntry = utils.getEntry()
-  for(let key of modifiedKeys) {
-      modifiedEntry[key] = webpackEntry[key]
+  let webpackEntry = exports.getEntry()
+  for (let key of modifiedKeys) {
+    modifiedEntry[key] = webpackEntry[key]
   }
   return modifiedEntry
 }
@@ -165,8 +165,8 @@ exports.getModifiedEntry = (modifiedFiles) => {
 exports.getAddEntry = (addFiles) => {
   let addKeys = exports.getKeys(addFiles)
   let addEntry = {}
-  for(let i of addKeys) {
-    let key = addKeyArr[i]
+  for (let i of addKeys) {
+    let key = addKeys[i]
     addEntry[key] = addFiles[key]
   }
   return addEntry
