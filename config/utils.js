@@ -119,7 +119,7 @@ exports.getHtmlWebpackPlugins = () => {
       let template = exports.getTemplate(entry[key])
       console.log(1111, key)
       return new HtmlWebpackPlugin({
-        filename: isDev ? `${key}.html` : `${__dirname}/dist/${key}.html`,
+        filename: isDev ? `${key}.html` : `${__dirname}/../dist/${key}.html`,
         template: template,
         inject: true,
         minify: {
