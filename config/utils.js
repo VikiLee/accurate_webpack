@@ -98,7 +98,7 @@ exports.getKey = (path) => {
   let endIndex = 0
   if (path.indexOf('component') > -1) {
     // 如果修改的是组件
-    endIndex = path.indexOf('component')
+    endIndex = path.indexOf('component') - 1
   } else {
     endIndex = path.lastIndexOf('/')
   }
