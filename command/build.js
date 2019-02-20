@@ -25,13 +25,15 @@ if (!isBuildAll) {
   // 获取修改的文件
   let modifiedFiles = []
   match = result.match(/modified:\s+(.+)/g)
-  for (let i = 0, len = match.length; i < len; i++) {
-    if (/src\/(views|components)/.test(match[i])) {
-      let path = match[i].match(/\s+(.+)/)[1]
-      modifiedFiles.push(path)
+  if (match) {
+    for (let i = 0, len = match.length; i < len; i++) {
+      if (/src\/(views|components)/.test(match[i])) {
+        let path = match[i].match(/\s+(.+)/)[1]
+        modifiedFiles.push(path)
+      }
     }
+    modifiedEntry = utils.getModifiedEntry(modifiedFiles)
   }
-  modifiedEntry = utils.getModifiedEntry(modifiedFiles)
 
   // 获取新加的文件
   let addFiles = []
@@ -49,11 +51,12 @@ if (!isBuildAll) {
       }
     }
   }
-  addEntry = utils.getAddEntry(addFiles)
+  addEntry = utils.getEntry(addFiles)
 }
 
 let newEntry = {}
 Object.assign(newEntry, addEntry, modifiedEntry)
+
 if (Object.keys(newEntry).length > 0 && !isBuildAll) {
   // 增量打包
   webpackConfig.entry = newEntry

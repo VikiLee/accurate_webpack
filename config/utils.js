@@ -73,15 +73,23 @@ exports.styleLoaders = function (options) {
   return output
 }
 
-// 获取入口文件
-exports.getEntry = function () {
+// 获取入口文件,有files参数的情况是从files文件列表获取，无files的时候是根据路径获取
+exports.getEntry = function (files) {
+  let entry = {}
+  if (files) {
+    for (let path of files) {
+      let key = exports.getKey(path)
+      entry[key] = './' + path
+    }
+    return entry
+  }
   let globPath = './src/views/**/index.js'
   return glob.sync(globPath)
     .reduce(function (entry, path) {
       let key = exports.getKey(path)
       entry[key] = path
       return entry
-    }, {})
+    }, entry)
 }
 
 // 获取单个入口文件对应的key
@@ -117,7 +125,6 @@ exports.getHtmlWebpackPlugins = () => {
     .map((key) => {
       // ejs模板，要和index.js在同个目录下
       let template = exports.getTemplate(entry[key])
-      console.log(1111, key)
       return new HtmlWebpackPlugin({
         filename: isDev ? `${key}.html` : `${__dirname}/../dist/${key}.html`,
         template: template,
@@ -160,14 +167,4 @@ exports.getModifiedEntry = (modifiedFiles) => {
     modifiedEntry[key] = webpackEntry[key]
   }
   return modifiedEntry
-}
-
-exports.getAddEntry = (addFiles) => {
-  let addKeys = exports.getKeys(addFiles)
-  let addEntry = {}
-  for (let i of addKeys) {
-    let key = addKeys[i]
-    addEntry[key] = addFiles[key]
-  }
-  return addEntry
 }

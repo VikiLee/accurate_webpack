@@ -1,9 +1,10 @@
 var utils = require(process.cwd() + '/config/utils')
 var config = require(process.cwd() + '/config')
 var vueLoaderConfig = require('./vue-loader.conf')
+var isDev = process.env.NODE_ENV === 'development'
 
 module.exports = {
-  entry: utils.getEntry(),
+  entry: isDev ? utils.getEntry() : {},
   output: {
     path: config.build.assetsRoot,
     filename: '[name].js',
