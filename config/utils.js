@@ -75,8 +75,8 @@ exports.styleLoaders = function (options) {
 
 // 获取入口文件,有files参数的情况是从files文件列表获取，无files的时候是根据路径获取
 exports.getEntry = function (files) {
+  let entry = {}
   if (files) {
-    let entry = {}
     for (let path of files) {
       let key = exports.getKey(path)
       entry[key] = './' + path
@@ -84,12 +84,14 @@ exports.getEntry = function (files) {
     return entry
   }
   let globPath = './src/views/**/index.js'
-  return glob.sync(globPath)
+  entry = glob.sync(globPath)
     .reduce(function (entry, path) {
       let key = exports.getKey(path)
       entry[key] = path
       return entry
     }, {})
+  
+  return entry
 }
 
 // 获取单个入口文件对应的key
@@ -105,7 +107,7 @@ exports.getKey = (path) => {
   return path.substring(startIndex, endIndex)
 }
 
-// 获取所有入口文件对应的keys
+// 获取所有入口文件对应的key
 exports.getKeys = (filesPath) => {
   let result = []
   for (let path of filesPath) {
@@ -117,9 +119,8 @@ exports.getKeys = (filesPath) => {
   return result
 }
 
-// 根据入口文件生成HtmlWebpackPlugins
-exports.getHtmlWebpackPlugins = () => {
-  let entry = exports.getEntry()
+// 根据入口配置生成HtmlWebpackPlugins
+exports.getHtmlWebpackPlugins = (entry) => {
   let keys = Object.keys(entry)
   let plugins = keys
     .map((key) => {

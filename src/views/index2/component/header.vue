@@ -1,6 +1,6 @@
 <template>
     <div>
-        header
+        header2
     </div>
 </template>
 <script>
