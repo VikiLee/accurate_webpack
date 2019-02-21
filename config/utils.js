@@ -75,8 +75,8 @@ exports.styleLoaders = function (options) {
 
 // 获取入口文件,有files参数的情况是从files文件列表获取，无files的时候是根据路径获取
 exports.getEntry = function (files) {
-  let entry = {}
   if (files) {
+    let entry = {}
     for (let path of files) {
       let key = exports.getKey(path)
       entry[key] = './' + path
@@ -89,7 +89,7 @@ exports.getEntry = function (files) {
       let key = exports.getKey(path)
       entry[key] = path
       return entry
-    }, entry)
+    }, {})
 }
 
 // 获取单个入口文件对应的key

@@ -58,17 +58,15 @@ let newEntry = {}
 Object.assign(newEntry, addEntry, modifiedEntry)
 
 if (Object.keys(newEntry).length > 0 && !isBuildAll) {
-  // 增量打包
+  // 精准&增量打包
   webpackConfig.entry = newEntry
   let plugins = utils.getHtmlWebpackPlugins(newEntry)
   webpackConfig.plugins = webpackConfig.plugins.concat(plugins)
 } else {
   // 全量打包
-  webpackConfig.entry = entry
   let plugins = utils.getHtmlWebpackPlugins(entry)
   webpackConfig.plugins = webpackConfig.plugins
     .concat(plugins)
-  webpackConfig.plugins.push(new CleanWebpackPlugin(['dist/*.*', 'dist/*/*.*']))
 }
 
 const spinner = ora('building....')
